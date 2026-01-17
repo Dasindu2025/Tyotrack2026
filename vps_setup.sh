@@ -7,9 +7,18 @@ set -e
 
 echo "🚀 Initializing Tyotrack Secure Enclave on VPS..."
 
-# 1. Update System
-echo "📦 Updating system packages..."
+# 1. Update System & Enable SWAP (Critical for faster builds on 4GB RAM)
+echo "📦 Preparing system and enabling SWAP memory..."
 apt-get update && apt-get upgrade -y
+
+if [ ! -f /swapfile ]; then
+    echo "🧠 Allocating 4GB SWAP space..."
+    fallocate -l 4G /swapfile
+    chmod 600 /swapfile
+    mkswap /swapfile
+    swapon /swapfile
+    echo '/swapfile none swap sw 0 0' | tee -a /etc/fstab
+fi
 
 # 2. Install Docker & Compose
 echo "🐳 Installing Docker & Docker Compose..."
