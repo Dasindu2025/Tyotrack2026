@@ -13,7 +13,7 @@ apt-get update && apt-get upgrade -y
 
 # 2. Install Docker & Compose
 echo "🐳 Installing Docker & Docker Compose..."
-apt-get install -y ca-certificates cursor curl gnupg lsb-release unzip
+apt-get install -y ca-certificates curl gnupg lsb-release unzip
 mkdir -p /etc/apt/keyrings
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
 echo \
