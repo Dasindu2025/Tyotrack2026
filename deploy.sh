@@ -8,7 +8,16 @@ set -e
 
 echo "⚔️ Initializing Tyotrack Secure Enclave..."
 
-# 1. Dependency Validation
+# 1. Dependency & Synchronization Check
+echo "🔍 Synchronizing with Command Center (GitHub)..."
+git reset --hard origin/main
+git pull origin main
+
+# 2. Infrastructure Hardening (Cache Busting)
+echo "🧹 Pruning old deployment artifacts..."
+docker system prune -f --volumes
+
+# 3. Dependency Validation
 declare -a DEPS=("docker" "docker-compose" "openssl")
 for dep in "${DEPS[@]}"; do
     if ! command -v "$dep" &> /dev/null; then
@@ -17,7 +26,7 @@ for dep in "${DEPS[@]}"; do
     fi
 done
 
-# 2. Cryptographic Secret Generation (Zero-Config)
+# 4. Cryptographic Secret Generation (Zero-Config)
 SECRETS_FILE=".secrets.env"
 if [ ! -f "$SECRETS_FILE" ]; then
     echo "🔐 Generating high-entropy cryptographic keys..."
@@ -58,10 +67,10 @@ docker compose --env-file "$SECRETS_FILE" up -d db redis flower
 
 # Build and start API components (Linearly to save CPU/RAM)
 echo "⚡ Building Secure API Layer..."
-docker compose --env-file "$SECRETS_FILE" up --build -d api
+docker compose --env-file "$SECRETS_FILE" up --build --no-cache -d api
 
 echo "⚡ Building Intelligence Dashboard (Next.js)..."
-docker compose --env-file "$SECRETS_FILE" up --build -d web
+docker compose --env-file "$SECRETS_FILE" up --build --no-cache -d web
 
 echo "⚡ Building Background Workers..."
 docker compose --env-file "$SECRETS_FILE" up --build -d worker

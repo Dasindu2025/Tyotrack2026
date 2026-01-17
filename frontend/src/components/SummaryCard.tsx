@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { LucideIcon } from 'lucide-react';
-import { cn } from '@/app/layout';
+import { cn } from '@/lib/utils';
 import { TiltCard } from './TiltCard';
 
 interface SummaryCardProps {

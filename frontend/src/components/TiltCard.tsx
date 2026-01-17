@@ -2,7 +2,7 @@
 
 import React, { useRef, useEffect } from 'react';
 import gsap from 'gsap';
-import { cn } from '@/app/layout';
+import { cn } from '@/lib/utils';
 
 interface TiltCardProps {
   children: React.ReactNode;

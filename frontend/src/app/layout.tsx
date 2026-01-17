@@ -2,15 +2,10 @@ import React from 'react'
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
-import { clsx, type ClassValue } from 'clsx'
-import { twMerge } from 'tailwind-merge'
+import { cn } from '@/lib/utils'
 import CommandPalette from '@/components/CommandPalette'
 
 const inter = Inter({ subsets: ['latin'] })
-
-export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs))
-}
 
 export const metadata: Metadata = {
   title: 'Tyotrack Enterprise | AAA Workforce Intelligence',

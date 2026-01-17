@@ -14,7 +14,7 @@ import {
   Shield,
   FileText
 } from 'lucide-react';
-import { cn } from '@/app/layout';
+import { cn } from '@/lib/utils';
 
 const menuItems = [
   { icon: LayoutDashboard, label: 'Dashboard', href: '/dashboard' },

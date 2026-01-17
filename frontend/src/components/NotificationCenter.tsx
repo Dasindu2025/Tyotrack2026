@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Bell, ShieldAlert, CheckCircle, Info, X } from 'lucide-react';
-import { cn } from '@/app/layout';
+import { cn } from '@/lib/utils';
 
 interface Notification {
   id: string;

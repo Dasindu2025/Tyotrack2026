@@ -16,7 +16,7 @@
   }
 
   ::selection {
-    @apply bg-primary/30;
+    background-color: oklch(0.65 0.22 260 / 0.3);
   }
 }
 

@@ -63,7 +63,7 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
     except JWTError:
         raise credentials_exception
 
-from database import APIKey
+from database import APIKey, get_db
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
