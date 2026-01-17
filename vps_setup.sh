@@ -22,6 +22,11 @@ echo \
 apt-get update
 apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 
+# 2.1 Symlink for docker-compose compatibility
+echo "🔗 Creating docker-compose symlink..."
+ln -sf /usr/libexec/docker/cli-plugins/docker-compose /usr/local/bin/docker-compose
+chmod +x /usr/local/bin/docker-compose
+
 # 3. System Hardening (UFW)
 echo "🛡️ Hardening Network Infrastructure..."
 apt-get install -y ufw
