@@ -7,6 +7,13 @@ set -e
 
 echo "🚀 Initializing Tyotrack Secure Enclave on VPS..."
 
+# 0. Network Optimization (Disable IPv6 permanently to prevent connection resets)
+echo "🌐 Optimizing network stack..."
+sysctl -w net.ipv6.conf.all.disable_ipv6=1
+sysctl -w net.ipv6.conf.default.disable_ipv6=1
+echo "net.ipv6.conf.all.disable_ipv6 = 1" >> /etc/sysctl.conf
+echo "net.ipv6.conf.default.disable_ipv6 = 1" >> /etc/sysctl.conf
+
 # 1. Update System & Enable SWAP (Critical for faster builds on 4GB RAM)
 echo "📦 Preparing system and enabling SWAP memory..."
 apt-get update && apt-get upgrade -y

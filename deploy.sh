@@ -47,9 +47,24 @@ EOF
     echo "----------------------------------------------------------------"
 fi
 
-# 3. Infrastructure Orchestration
+# 3. Infrastructure Orchestration (Sequential Build for stability on 1-CPU VPS)
 echo "🏗️ Scaling secure containers..."
-docker compose --env-file "$SECRETS_FILE" up --build -d
+
+# Pull base images first
+docker compose --env-file "$SECRETS_FILE" pull db redis flower
+
+# Build and start baseline infra
+docker compose --env-file "$SECRETS_FILE" up -d db redis flower
+
+# Build and start API components (Linearly to save CPU/RAM)
+echo "⚡ Building Secure API Layer..."
+docker compose --env-file "$SECRETS_FILE" up --build -d api
+
+echo "⚡ Building Intelligence Dashboard (Next.js)..."
+docker compose --env-file "$SECRETS_FILE" up --build -d web
+
+echo "⚡ Building Background Workers..."
+docker compose --env-file "$SECRETS_FILE" up --build -d worker
 
 # 4. Post-Deployment Health Check
 echo "📡 Verifying system integrity..."
