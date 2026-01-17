@@ -2,33 +2,71 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --background: 222 47% 4%;
-  --foreground: 210 40% 98%;
-  --primary: 217 91% 60%;
-  --primary-foreground: 222 47% 11%;
-  --secondary: 217 32% 17%;
-  --secondary-foreground: 210 40% 98%;
-  --accent: 217 91% 60%;
-  --accent-foreground: 210 40% 98%;
-  --muted: 217 32% 17%;
-  --muted-foreground: 215 20% 65%;
-  --border: 217 32% 17%;
-}
-
 @layer base {
+  :root {
+    --background: 0.18 0.02 240;
+    --foreground: 0.95 0.01 240;
+    /* ... tokens mapped to oklch ... */
+  }
+
   body {
-    @apply bg-background text-foreground selection:bg-primary selection:text-primary-foreground;
-    font-feature-settings:
-      "rlig" 1,
-      "calt" 1;
+    @apply bg-background text-foreground antialiased selection:bg-primary/30;
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'ss01';
+    scroll-behavior: smooth;
   }
 }
 
-.glass-panel {
-  @apply bg-secondary/30 backdrop-blur-xl border border-white/10;
+@layer components {
+  .glass-panel {
+    @apply bg-white/[0.03] backdrop-blur-[24px] border border-white/[0.08] shadow-premium rounded-3xl transition-all duration-300;
+  }
+  
+  .glass-button {
+    @apply px-6 py-3 bg-white/[0.05] hover:bg-white/[0.1] border border-white/[0.1] rounded-xl font-semibold transition-all duration-200 active:scale-95;
+  }
+
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-br from-white via-white/90 to-white/40;
+  }
+
+  .premium-card {
+    @apply border border-white/10 bg-gradient-to-br from-white/[0.05] to-transparent shadow-xl rounded-3xl overflow-hidden;
+  }
 }
 
-.text-gradient {
-  @apply bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-indigo-600;
+/* Custom Scrollbar - Military Precision */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  @apply bg-transparent;
+}
+::-webkit-scrollbar-thumb {
+  @apply bg-white/10 rounded-full hover:bg-white/20 transition-colors;
+}
+
+/* Skeleton Loading Shimmer */
+.skeleton {
+  @apply relative overflow-hidden bg-white/[0.05] rounded-lg;
+  &::after {
+    @apply absolute inset-0 content-[''] -translate-x-full;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent);
+    animation: shimmer 1.5s infinite;
+  }
+}
+
+@keyframes shimmer {
+  100% { transform: translateX(100%); }
+}
+
+/* Page Transition Helpers */
+.page-fade-enter {
+  opacity: 0;
+  filter: blur(10px);
+}
+.page-fade-enter-active {
+  opacity: 1;
+  filter: blur(0);
+  transition: opacity 400ms, filter 400ms;
 }

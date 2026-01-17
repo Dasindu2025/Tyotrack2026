@@ -1,74 +1,81 @@
 'use client';
 
+import React from 'react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { 
   LayoutDashboard, 
   Clock, 
   Users, 
-  Building2, 
-  FileBarChart, 
-  ShieldCheck, 
-  Settings,
-  LogOut
+  Settings, 
+  LogOut, 
+  ChevronRight,
+  Shield,
+  FileText
 } from 'lucide-react';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
 import { cn } from '@/app/layout';
 
 const menuItems = [
   { icon: LayoutDashboard, label: 'Dashboard', href: '/dashboard' },
-  { icon: Clock, label: 'Time Entries', href: '/time-entries' },
-  { icon: Users, label: 'Teams', href: '/teams', roles: ['company_admin', 'manager'] },
-  { icon: Building2, label: 'Company', href: '/company', roles: ['company_admin'] },
-  { icon: FileBarChart, label: 'Reports', href: '/reports' },
-  { icon: ShieldCheck, label: 'Platform', href: '/platform', roles: ['super_admin'] },
+  { icon: Clock, label: 'Logs', href: '/logs' },
+  { icon: FileText, label: 'Reports', href: '/reports' },
+  { icon: Users, label: 'Manage', href: '/admin' },
+  { icon: Settings, label: 'Protocol', href: '/settings' },
 ];
 
 export default function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <motion.div 
-      initial={{ x: -100, opacity: 0 }}
-      animate={{ x: 0, opacity: 1 }}
-      className="w-64 h-screen bg-secondary/50 backdrop-blur-xl border-r border-white/10 flex flex-col"
-    >
-      <div className="p-6 flex items-center gap-3">
-        <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center font-bold text-white shadow-lg shadow-primary/30">
-          T
+    <aside className="w-72 h-screen bg-background border-r border-white/[0.05] flex flex-col z-40">
+      <div className="h-24 px-8 flex items-center gap-3">
+        <div className="w-10 h-10 bg-primary/10 border border-primary/20 rounded-xl flex items-center justify-center text-primary shadow-glow">
+          <Shield size={22} />
         </div>
-        <span className="text-xl font-bold tracking-tight text-white">Tyotrack</span>
+        <div className="flex flex-col">
+          <span className="text-xl font-black text-white tracking-widest leading-none">TYOTRACK</span>
+          <span className="text-[10px] font-bold text-muted uppercase tracking-[0.3em] mt-1 italic">Secure Ops</span>
+        </div>
       </div>
 
-      <nav className="flex-1 px-4 py-6 space-y-1">
+      <nav className="flex-1 px-4 py-8 space-y-2">
         {menuItems.map((item) => {
           const isActive = pathname === item.href;
           return (
-            <Link key={item.href} href={item.href}>
-              <motion.div
+            <Link key={item.label} href={item.href}>
+              <motion.div 
                 whileHover={{ x: 4 }}
                 whileTap={{ scale: 0.98 }}
                 className={cn(
-                  "flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group",
+                  "relative flex items-center justify-between px-4 py-3.5 rounded-2xl group transition-all duration-300",
                   isActive 
-                    ? "bg-primary text-white shadow-lg shadow-primary/20" 
-                    : "text-muted-foreground hover:bg-white/5 hover:text-white"
+                    ? "bg-primary/10 text-primary border border-primary/20" 
+                    : "text-muted hover:text-white hover:bg-white/[0.03]"
                 )}
               >
-                <item.icon size={20} className={cn(isActive ? "text-white" : "text-muted-foreground group-hover:text-primary")} />
-                <span className="font-medium">{item.label}</span>
+                <div className="flex items-center gap-4">
+                  <item.icon size={20} className={cn("transition-colors", isActive ? "text-primary" : "text-muted group-hover:text-white")} />
+                  <span className="text-sm font-bold tracking-tight">{item.label}</span>
+                </div>
+                {isActive && (
+                  <motion.div layoutId="active" className="w-1 h-4 bg-primary rounded-full shadow-glow" />
+                )}
+                {!isActive && (
+                  <ChevronRight size={14} className="text-muted/20 group-hover:text-muted/40 transition-colors" />
+                )}
               </motion.div>
             </Link>
           );
         })}
       </nav>
 
-      <div className="p-4 border-t border-white/10">
-        <button className="flex items-center gap-3 px-4 py-3 w-full text-muted-foreground hover:text-red-400 hover:bg-red-400/10 rounded-xl transition-all">
-          <LogOut size={20} />
-          <span className="font-medium">Logout</span>
+      <div className="p-6">
+        <button className="w-full p-4 glass-panel flex items-center gap-4 text-muted hover:text-danger hover:bg-danger/5 hover:border-danger/20 transition-all group rounded-2xl">
+          <LogOut size={20} className="group-hover:rotate-12 transition-transform" />
+          <span className="text-sm font-bold tracking-tight">Deactivate Session</span>
         </button>
       </div>
-    </motion.div>
+    </aside>
   );
 }

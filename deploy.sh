@@ -1,64 +1,71 @@
 #!/bin/bash
 
 # ==============================================================================
-# Tyotrack Enterprise Workforce Platform - Deployment Script
+# Tyotrack 2026: Military-Grade Deployment Protocol
 # ==============================================================================
 
-# Ensure script stops on error
 set -e
 
-echo "🚀 Initializing Tyotrack Corporate Deployment..."
+echo "⚔️ Initializing Tyotrack Secure Enclave..."
 
-# 1. Check dependencies
-if ! command -v docker &> /dev/null; then
-    echo "❌ Error: Docker is not installed."
-    exit 1
-fi
+# 1. Dependency Validation
+declare -a DEPS=("docker" "docker-compose" "openssl")
+for dep in "${DEPS[@]}"; do
+    if ! command -v "$dep" &> /dev/null; then
+        echo "❌ Critical Error: $dep is not in PATH."
+        exit 1
+    fi
+done
 
-if ! command -v docker-compose &> /dev/null && ! docker compose version &> /dev/null; then
-    echo "❌ Error: Docker Compose is not installed."
-    exit 1
-fi
-
-# 2. Zero-Config Secret Generation
+# 2. Cryptographic Secret Generation (Zero-Config)
 SECRETS_FILE=".secrets.env"
-
 if [ ! -f "$SECRETS_FILE" ]; then
-    echo "🔐 Generating cryptographically secure secrets..."
+    echo "🔐 Generating high-entropy cryptographic keys..."
     
     JWT_SECRET=$(openssl rand -hex 64)
-    POSTGRES_PASSWORD=$(openssl rand -hex 24)
-    REDIS_PASSWORD=$(openssl rand -hex 24)
-    SUPER_ADMIN_PASSWORD=$(openssl rand -hex 12)
+    POSTGRES_PASSWORD=$(openssl rand -hex 32)
+    REDIS_PASSWORD=$(openssl rand -hex 32)
+    SUPER_ADMIN_PASSWORD=$(openssl rand -hex 16)
     
     cat <<EOF > "$SECRETS_FILE"
-POSTGRES_USER=tyo_admin
-POSTGRES_DB=tyotrack
+POSTGRES_USER=tyo_commander
+POSTGRES_DB=tyotrack_secure
 POSTGRES_PASSWORD=$POSTGRES_PASSWORD
 REDIS_PASSWORD=$REDIS_PASSWORD
 JWT_SECRET=$JWT_SECRET
-SUPER_ADMIN_EMAIL=admin@tyotrack.enterprise
+SUPER_ADMIN_EMAIL=commander@tyotrack.enterprise
 SUPER_ADMIN_PASSWORD=$SUPER_ADMIN_PASSWORD
-DATABASE_URL=postgresql+asyncpg://tyo_admin:$POSTGRES_PASSWORD@db:5432/tyotrack
+DATABASE_URL=postgresql+asyncpg://tyo_commander:$POSTGRES_PASSWORD@db:5432/tyotrack_secure
 EOF
     
-    echo "✅ Secrets generated and secured in $SECRETS_FILE"
+    chmod 600 "$SECRETS_FILE"
+    echo "✅ Enclave secrets locked in $SECRETS_FILE"
     echo "----------------------------------------------------------------"
-    echo "💎 SUPER ADMIN CREDENTIALS (SAVE THESE)"
-    echo "Email: admin@tyotrack.enterprise"
-    echo "Password: $SUPER_ADMIN_PASSWORD"
+    echo "🎖️ COMMANDER ACCESS CREDENTIALS"
+    echo "Login: commander@tyotrack.enterprise"
+    echo "Pass:  $SUPER_ADMIN_PASSWORD"
     echo "----------------------------------------------------------------"
-else
-    echo "✅ Using existing secrets from $SECRETS_FILE"
 fi
 
-# 3. Pull and Build
-echo "🏗️ Building and starting services..."
+# 3. Infrastructure Orchestration
+echo "🏗️ Scaling secure containers..."
 docker compose --env-file "$SECRETS_FILE" up --build -d
 
-echo "📊 System Status:"
-docker compose ps
+# 4. Post-Deployment Health Check
+echo "📡 Verifying system integrity..."
+MAX_RETRIES=12
+COUNT=0
+until $(curl -sf http://localhost:8000/health > /dev/null); do
+    if [ $COUNT -eq $MAX_RETRIES ]; then
+      echo "❌ Deployment failure: API heartbeat not detected."
+      exit 1
+    fi
+    echo -n "."
+    sleep 5
+    ((COUNT++))
+done
 
-echo "🎉 Deployment Successful!"
-echo "📍 Platform Access: http://localhost:3000"
-echo "🛠️ API Documentation: http://localhost:8000/docs"
+echo -e "\n🎉 MISSION SUCCESSFUL!"
+echo "📍 Secure Access: http://localhost:3000"
+echo "🛠️ API Spec:      http://localhost:8000/api/v1/docs"
+echo "🌸 Worker Mon:    http://localhost:5555"

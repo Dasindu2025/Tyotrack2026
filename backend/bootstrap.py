@@ -1,46 +1,36 @@
 import asyncio
 import os
-from database import engine, Base, User, UserRole
-from sqlalchemy.future import select
-from sqlalchemy.ext.asyncio import AsyncSession
-from passlib.context import CryptContext
-
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
-def get_password_hash(password):
-    return pwd_context.hash(password)
+from database import engine, Base, User, UserRole, AsyncSessionLocal
+from auth import get_password_hash
 
 async def bootstrap():
-    print("🚀 Starting Tyotrack Bootstrap Process...")
+    print("🚀 Initializing Tyotrack Secure Enclave Infrastructure...")
     
     async with engine.begin() as conn:
-        print("📁 Creating database tables...")
+        # Check if RLS extension is needed (Postgres specific)
+        # await conn.execute("CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\";")
         await conn.run_sync(Base.metadata.create_all)
     
-    async with AsyncSession(engine) as session:
-        # Check if Super Admin exists
-        email = os.getenv("SUPER_ADMIN_EMAIL", "admin@tyotrack.enterprise")
-        password = os.getenv("SUPER_ADMIN_PASSWORD", "tyo_admin_pass")
+    async with AsyncSessionLocal() as session:
+        # Create Super Admin if not exists
+        email = os.getenv("SUPER_ADMIN_EMAIL", "commander@tyotrack.enterprise")
+        password = os.getenv("SUPER_ADMIN_PASSWORD", "secure_pass_2026")
         
+        from sqlalchemy import select
         result = await session.execute(select(User).where(User.email == email))
-        admin = result.scalar_one_or_none()
-        
-        if not admin:
-            print(f"👤 Creating Super Admin: {email}")
+        if not result.scalar_one_or_none():
             admin = User(
                 email=email,
                 hashed_password=get_password_hash(password),
-                full_name="Platform Super Admin",
+                full_name="High Commander",
                 role=UserRole.SUPER_ADMIN,
                 is_active=True
             )
             session.add(admin)
             await session.commit()
-            print("✅ Super Admin created successfully.")
+            print(f"✅ Secure Access Initialized: {email}")
         else:
-            print("ℹ️ Super Admin already exists.")
-
-    print("🎉 Bootstrap complete.")
+            print("ℹ️ Secure Enclave already initialized.")
 
 if __name__ == "__main__":
     asyncio.run(bootstrap())

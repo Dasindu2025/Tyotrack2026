@@ -1,7 +1,8 @@
 import os
+import uuid
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 from sqlalchemy.orm import DeclarativeBase
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Enum, JSON, Boolean, Table
+from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Enum, JSON, Boolean, Table, Text, UUID
 import enum
 from datetime import datetime
 
@@ -35,12 +36,21 @@ class Tenant(Base):
 class User(Base):
     __tablename__ = "users"
     id = Column(Integer, primary_key=True)
-    tenant_id = Column(Integer, ForeignKey("tenants.id"), nullable=True) # Null for Super Admin
-    email = Column(String, unique=True, nullable=False)
+    tenant_id = Column(Integer, ForeignKey("tenants.id"), nullable=True)
+    email = Column(String, unique=True, nullable=False, index=True)
     hashed_password = Column(String, nullable=False)
     full_name = Column(String, nullable=False)
     role = Column(Enum(UserRole), nullable=False)
     is_active = Column(Boolean, default=True)
+    
+    # Military-Grade Security Extensions
+    mfa_enabled = Column(Boolean, default=False)
+    mfa_secret = Column(String, nullable=True) # TOTP Secret
+    last_login_at = Column(DateTime)
+    last_fingerprint = Column(String) # Device fingerprint
+    failed_login_attempts = Column(Integer, default=0)
+    locked_until = Column(DateTime, nullable=True)
+    
     created_at = Column(DateTime, default=datetime.utcnow)
 
 class Project(Base):
@@ -65,7 +75,33 @@ class TimeEntry(Base):
     audit_metadata = Column(JSON) # To track changes
     is_split = Column(Boolean, default=False)
     parent_entry_id = Column(Integer, ForeignKey("time_entries.id"), nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow, index=True)
+
+class AuditLog(Base):
+    __tablename__ = "audit_logs"
+    id = Column(Integer, primary_key=True)
+    tenant_id = Column(Integer, ForeignKey("tenants.id"), nullable=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
+    action = Column(String, nullable=False, index=True) 
+    resource_type = Column(String, nullable=False)
+    resource_id = Column(Integer)
+    old_value = Column(JSON)
+    new_value = Column(JSON)
+    ip_address = Column(String)
+    user_agent = Column(String)
+    checksum = Column(String) # For audit immutability (SHA-256)
+    timestamp = Column(DateTime, default=datetime.utcnow, index=True)
+
+class APIKey(Base):
+    __tablename__ = "api_keys"
+    id = Column(Integer, primary_key=True)
+    tenant_id = Column(Integer, ForeignKey("tenants.id"), nullable=False, index=True)
+    key_hash = Column(String, unique=True, nullable=False, index=True)
+    label = Column(String, nullable=False)
+    is_active = Column(Boolean, default=True)
+    scopes = Column(JSON) # List of allowed scopes e.g. ["reports:read"]
     created_at = Column(DateTime, default=datetime.utcnow)
+    expires_at = Column(DateTime, nullable=True)
 
 async def get_db():
     async with AsyncSessionLocal() as session:
