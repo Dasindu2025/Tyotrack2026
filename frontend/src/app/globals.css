@@ -10,9 +10,13 @@
   }
 
   body {
-    @apply bg-background text-foreground antialiased selection:bg-primary/30;
+    @apply bg-background text-foreground antialiased;
     font-feature-settings: 'cv02', 'cv03', 'cv04', 'ss01';
     scroll-behavior: smooth;
+  }
+
+  ::selection {
+    @apply bg-primary/30;
   }
 }
 
